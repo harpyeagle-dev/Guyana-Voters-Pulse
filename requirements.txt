@@ -1,0 +1,6 @@
+streamlit
+firebase-admin
+streamlit-cookies-manager
+pandas
+requests
+email-validator
