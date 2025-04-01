@@ -1,32 +1,35 @@
-# email_verification.py
 import random
-import smtplib
-import ssl
-from email.message import EmailMessage
-from datetime import datetime, timedelta
+import datetime
 from firebase_config import db
-import streamlit as st
 
+# 🔐 Send verification code to an email
 def send_verification_code(email):
-    code = f"{random.randint(100000, 999999)}"
-    expiry = datetime.utcnow() + timedelta(minutes=10)
-    db.collection("auth_codes").document(email).set({"code": code, "expiry": expiry})
+    code = str(random.randint(100000, 999999))
+    expiry = (datetime.datetime.now() + datetime.timedelta(minutes=10)).isoformat()
 
-    msg = EmailMessage()
-    msg["Subject"] = "Your Secure Voting Code"
-    msg["From"] = st.secrets["email"]["username"]
-    msg["To"] = email
-    msg.set_content(f"Your 6-digit verification code is: {code}\nThis code expires in 10 minutes.")
+    key = email.replace(".", "_")  # Firebase keys can't contain dots
 
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-        server.login(st.secrets["email"]["username"], st.secrets["email"]["password"])
-        server.send_message(msg)
+    db.reference(f"/auth_codes/{key}").set({
+        "code": code,
+        "expiry": expiry
+    })
 
-def verify_code(email, code):
-    doc = db.collection("auth_codes").document(email).get()
-    if doc.exists:
-        data = doc.to_dict()
-        if data["code"] == code and datetime.utcnow() < data["expiry"].replace(tzinfo=None):
-            return True
-    return False
+    # Placeholder: print to console (replace with email sending)
+    print(f"Verification code sent to {email}: {code}")
+    return code
+
+# ✅ Verify a submitted code
+def verify_code(email, submitted_code):
+    key = email.replace(".", "_")
+    record = db.reference(f"/auth_codes/{key}").get()
+
+    if not record:
+        return False
+
+    code_matches = str(record.get("code")) == str(submitted_code)
+
+    # Check expiry
+    expiry_time = datetime.datetime.fromisoformat(record.get("expiry"))
+    not_expired = expiry_time > datetime.datetime.now()
+
+    return code_matches and not_expired
