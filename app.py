@@ -1,5 +1,7 @@
 # app.py
 import streamlit as st
+st.set_page_config("Secure Voting App", layout="centered")
+
 from firebase_config import db
 from email_verification import send_verification_code, verify_code
 from vote_utils import get_ip_address, get_device_id, has_already_voted, submit_vote, get_vote_stats
@@ -12,7 +14,6 @@ if not cookies.ready():
     st.stop()
 
 # --- App layout ---
-st.set_page_config("Secure Voting App", layout="centered")
 st.title("🗳️ Secure Voting App")
 
 tabs = st.tabs(["✅ Vote", "📊 Dashboard", "🔐 Admin"])
