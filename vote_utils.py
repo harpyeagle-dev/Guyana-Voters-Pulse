@@ -54,15 +54,23 @@ def submit_vote(choice, voter_id):
 
 # 📊 Count votes by candidate
 def get_vote_stats():
-    votes_snapshot = db.reference("/votes").get()
+    try:
+        st.write("Connecting to /votes...")
+        votes_snapshot = db.reference("/votes").get()
+        st.write("Snapshot received:", votes_snapshot)
 
-    if not votes_snapshot:
-        return pd.DataFrame(columns=["Candidate", "Votes"])
+        if not votes_snapshot:
+            st.warning("No votes found.")
+            return pd.DataFrame(columns=["option", "count"])
 
-    vote_counts = {}
-    for vote_id, vote_data in votes_snapshot.items():
-        choice = vote_data.get("choice")
-        vote_counts[choice] = vote_counts.get(choice, 0) + 1
+        vote_counts = {}
+        for user_id, vote_data in votes_snapshot.items():
+            vote = vote_data.get("vote")
+            if vote:
+                vote_counts[vote] = vote_counts.get(vote, 0) + 1
 
-    stats_df = pd.DataFrame(list(vote_counts.items()), columns=["Candidate", "Votes"])
-    return stats_df.sort_values("Votes", ascending=False)
+        return pd.DataFrame(list(vote_counts.items()), columns=["option", "count"])
+
+    except Exception as e:
+        st.error(f"Error in get_vote_stats(): {e}")
+        return pd.DataFrame(columns=["option", "count"])
