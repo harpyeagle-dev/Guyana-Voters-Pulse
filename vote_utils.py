@@ -24,7 +24,7 @@ def get_device_id():
 
 # 🛡️ Check if this device/email has already voted
 def has_already_voted(identifier):
-    ref = db.reference("/votes")
+    votes_ref = db.reference("/votes")
     all_votes = ref.get()
 
     if not all_votes:
