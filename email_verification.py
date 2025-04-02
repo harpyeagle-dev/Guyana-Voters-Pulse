@@ -1,7 +1,7 @@
 import random
 import datetime
 import re
-from fireside_config import db
+from firebase_config import db
 
 def sanitize_key(email):
     # Firebase keys can't contain . # $ [ ] /
