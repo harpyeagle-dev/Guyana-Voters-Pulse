@@ -55,12 +55,11 @@ def submit_vote(choice, voter_id):
 # 📊 Count votes by candidate
 def get_vote_stats():
     try:
-        st.write("Connecting to /votes...")
+        st.write("📡 Fetching /votes from Firebase...")
         votes_snapshot = db.reference("/votes").get()
-        st.write("Snapshot received:", votes_snapshot)
 
         if not votes_snapshot:
-            st.warning("No votes found.")
+            st.warning("No votes found in the database yet.")
             return pd.DataFrame(columns=["option", "count"])
 
         vote_counts = {}
@@ -72,5 +71,5 @@ def get_vote_stats():
         return pd.DataFrame(list(vote_counts.items()), columns=["option", "count"])
 
     except Exception as e:
-        st.error(f"Error in get_vote_stats(): {e}")
+        st.error(f"❌ Firebase error: {e}")
         return pd.DataFrame(columns=["option", "count"])
