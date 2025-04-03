@@ -5,6 +5,12 @@ import pandas
 
 def initialize_firebase():
     try:
+    db.reference("/debug_test").set({"status": "connected"})
+    st.write("✅ Firebase test write succeeded")
+
+except Exception as e:
+    st.error("❌ Firebase test write failed")
+    st.exception(e)
         st.write("🔄 Initializing Firebase...")
         if not firebase_admin._apps:
             cred = credentials.Certificate({
