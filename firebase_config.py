@@ -4,13 +4,7 @@ import streamlit as st
 import pandas
 
 def initialize_firebase():
-try:
-    db.reference("/debug_test").set({"status": "connected"})
-    st.success("✅ Firebase test write succeeded")
-except Exception as e:
-    st.error("❌ Firebase test write failed")
-    st.exception(e)
-        st.write("🔄 Initializing Firebase...")
+    try:
         if not firebase_admin._apps:
             cred = credentials.Certificate({
                 "type": st.secrets["FIREBASE"]["type"],
@@ -25,14 +19,15 @@ except Exception as e:
                 "client_x509_cert_url": st.secrets["FIREBASE"]["client_x509_cert_url"]
             })
             firebase_admin.initialize_app(cred, {
-                'databaseURL': st.secrets["FIREBASE"]["database_url"]
+                "databaseURL": st.secrets["FIREBASE"]["database_url"]
             })
-            st.success("✅ Firebase initialized.")
+
+        # 🔁 Optional: quick test write to confirm it worked
+        db.reference("/debug_test").set({"status": "connected"})
+        st.success("✅ Firebase test write succeeded")
         return db
+
     except Exception as e:
         st.error("❌ Firebase initialization failed")
         st.exception(e)
         raise
-
-# Initialize once and reuse
-db = initialize_firebase()
