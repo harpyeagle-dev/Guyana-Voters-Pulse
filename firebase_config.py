@@ -7,7 +7,6 @@ def initialize_firebase():
     try:
     db.reference("/debug_test").set({"status": "connected"})
     st.write("✅ Firebase test write succeeded")
-
 except Exception as e:
     st.error("❌ Firebase test write failed")
     st.exception(e)
