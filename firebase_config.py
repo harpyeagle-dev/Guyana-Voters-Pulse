@@ -19,7 +19,7 @@ def initialize_firebase():
                 "client_x509_cert_url": st.secrets["FIREBASE"]["client_x509_cert_url"]
             })
             firebase_admin.initialize_app(cred, {
-                'databaseURL': st.secrets["FIREBASE"]["https://guyana-voters-pulse-default-rtdb.firebaseio.com"]
+                'databaseURL': st.secrets["FIREBASE"]["database_url"]
             })
             st.success("✅ Firebase initialized.")
         return db
