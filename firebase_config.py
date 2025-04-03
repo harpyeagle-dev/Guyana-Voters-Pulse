@@ -4,7 +4,7 @@ import streamlit as st
 import pandas
 
 def initialize_firebase():
-    try:
+try:
     db.reference("/debug_test").set({"status": "connected"})
     st.write("✅ Firebase test write succeeded")
 except Exception as e:
