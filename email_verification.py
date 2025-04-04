@@ -2,6 +2,8 @@ import random
 import datetime
 import re
 from firebase_config import db
+import smtplib
+from email.message import EmailMessage
 
 def sanitize_key(email):
     return re.sub(r'[.#$\[\]/]', '_', email.split('@')[0])
