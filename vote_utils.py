@@ -5,6 +5,7 @@ import socket
 import uuid
 import pandas as pd
 import datetime
+import requests
 
 # 🔍 Get the user's IP address
 def get_ip_address():
