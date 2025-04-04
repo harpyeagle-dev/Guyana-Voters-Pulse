@@ -12,7 +12,7 @@ def send_verification_code(email):
     key = sanitize_key(email)
 
     try:
-        # Save to Firebase
+        # Save to firebase
         db.reference(f"/auth_codes/{key}").set({"code": code, "expiry": expiry})
 
         # Send the email
@@ -31,3 +31,19 @@ def send_verification_code(email):
     except Exception as e:
         st.error("❌ Failed to send verification code")
         st.exception(e)
+
+def verify_code(email, entered_code):
+    key = sanitize_key(email)
+    record = db.reference(f"/auth_codes/{key}").get()
+
+    if not record:
+        return False
+
+    if record.get("code") != entered_code:
+        return False
+
+    expiry = datetime.datetime.fromisoformat(record["expiry"])
+    if datetime.datetime.now() > expiry:
+        return False
+
+    return True
