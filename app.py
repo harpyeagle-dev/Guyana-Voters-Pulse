@@ -1,79 +1,83 @@
-# app.py
 import streamlit as st
-st.set_page_config("Secure Voting App", layout="centered")
+import datetime
+from vote_utils import (
+    record_vote,
+    has_already_voted,
+    has_email_already_voted,
+    get_vote_stats,
+    get_vote_sheet,
+    filter_votes_by_date,
+    get_field_distribution
+)
+from device_utils import get_device_id
 
-from firebase_config import db
-from email_verification import send_verification_code, verify_code
-from vote_utils import get_ip_address, get_device_id, has_already_voted, submit_vote, get_vote_stats
-from streamlit_cookies_manager import EncryptedCookieManager
-from datetime import datetime
+st.set_page_config(page_title="Elections 2025 Opinion Poll", layout="wide")
+st.title("🗳️ Elections 2025 Voter Opinion Poll")
 
-# --- Set up cookies ---
-cookies = EncryptedCookieManager(prefix="vote_", password="your-secret-key")
-if not cookies.ready():
-    st.stop()
+tab1, tab2, tab3 = st.tabs(["📋 Poll", "📊 Results", "🛠️ Admin"])
 
-# --- App layout ---
-st.title("🗳️ Secure Voting App")
+with tab1:
+    st.header("🗳️ Cast Your Opinion")
+    email = st.text_input("Email (optional)")
+    candidate = st.radio("Preferred Candidate", ["Candidate A", "Candidate B", "Undecided"])
+    issue = st.selectbox("Top Issue", ["Economy", "Healthcare", "Education", "Security"])
+    will_vote = st.selectbox("Will you vote in 2025?", ["Yes", "No"])
+    age_group = st.selectbox("Age Range", ["18–25", "26–40", "41–60", "60+"])
 
-tabs = st.tabs(["✅ Vote", "📊 Dashboard", "🔐 Admin"])
-
-# --- Vote tab ---
-with tabs[0]:
-    st.subheader("Step 1: Verify Email")
-    email = st.text_input("Enter your email")
-
-    if st.button("Send Code"):
-        if email:
-            send_verification_code(email)
-            st.success("Verification code sent to your email.")
-
-    code = st.text_input("Enter the 6-digit code")
-    if st.button("Verify Code"):
-        if verify_code(email, code):
-            st.session_state["verified_email"] = email
-            st.success("Email verified. You may now vote.")
+    if st.button("Submit Response"):
+        if has_already_voted() or (email and has_email_already_voted(email)):
+            st.warning("⚠️ You've already participated in this poll.")
         else:
-            st.error("Invalid or expired code.")
+            response = {
+                "vote": candidate,
+                "issue": issue,
+                "will_vote": will_vote,
+                "age_group": age_group
+            }
+            record_vote(email or f"anonymous_{get_device_id()[:8]}", response)
+            st.success("✅ Your response has been recorded!")
 
-    if "verified_email" in st.session_state:
-        st.subheader("Step 2: Cast Your Vote")
-        vote = st.radio("Choose your option", ["Option A", "Option B", "Option C"])
-        if st.button("Submit Vote"):
-            email = st.session_state["verified_email"]
-            ip = get_ip_address()
-            device_id = get_device_id(cookies)
+with tab2:
+    st.header("📊 Poll Results")
 
-            if has_already_voted(email=email, ip=ip, device_id=device_id):
-                st.error("You have already voted from this device/email/IP.")
-            else:
-                submit_vote(email, vote, ip, device_id)
-                st.success("✅ Your vote has been recorded!")
+    st.subheader("🧮 Vote Counts")
+    vote_stats = get_vote_stats()
+    if vote_stats:
+        st.bar_chart(vote_stats)
 
-# --- Dashboard tab ---
-with tabs[1]:
-    st.subheader("📊 Live Vote Dashboard")
-    stats_df = get_vote_stats()
+    st.subheader("📌 Top Issues")
+    issue_stats = get_vote_stats("issue")
+    if issue_stats:
+        st.bar_chart(issue_stats)
 
-    if stats_df.empty:
-        st.info("No votes yet.")
+    st.subheader("👥 Age Group Breakdown")
+    age_stats = get_field_distribution("age_group")
+    if age_stats:
+        st.bar_chart(age_stats)
+
+    st.subheader("🗳️ Will You Vote in 2025?")
+    will_vote_stats = get_field_distribution("will_vote")
+    if will_vote_stats:
+        st.bar_chart(will_vote_stats)
+
+with tab3:
+    st.header("🛠️ Admin View")
+    admin_key = st.text_input("Admin Password", type="password")
+
+    if admin_key == st.secrets.get("ADMIN_KEY", "changeme"):
+        df = get_vote_sheet()
+        st.subheader("📋 Full Poll Data")
+        st.dataframe(df, use_container_width=True)
+
+        st.subheader("📆 Filter by Date")
+        start_date = st.date_input("Start Date", datetime.date.today())
+        end_date = st.date_input("End Date", datetime.date.today())
+
+        if st.button("Apply Filter"):
+            filtered_df = filter_votes_by_date(start_date, end_date)
+            st.dataframe(filtered_df, use_container_width=True)
+
+        csv = df.to_csv(index=False).encode("utf-8")
+        st.download_button("📥 Download All Responses", data=csv, file_name="elections_2025_poll_data.csv")
     else:
-        st.dataframe(stats_df)
-        st.bar_chart(stats_df.set_index("option"))
-
-# --- Admin tab ---
-with tabs[2]:
-    st.subheader("Admin Login")
-    admin_pw = st.text_input("Enter admin password", type="password")
-    if st.button("Login"):
-        if admin_pw == "your_admin_password":  # Replace this securely later
-            st.session_state["is_admin"] = True
-        else:
-            st.error("Incorrect password.")
-
-    if st.session_state.get("is_admin"):
-        st.success("Welcome, admin!")
-        st.write("All Votes:")
-        votes = db.collection("votes").stream()
-        all_votes = [{"email": v.get("email"), "vote": v.get("vote"), "ip": v.get("ip"), "device_id": v.get("device_id"), "timestamp": v.get("timestamp")} for v in [v.to_dict() for v in votes]]
-        st.dataframe(all_votes)
+        st.warning("🔐 Enter admin password to view full results.")
