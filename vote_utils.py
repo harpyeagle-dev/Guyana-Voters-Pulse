@@ -14,9 +14,9 @@ def get_ip_address():
         return "unknown"
 
 # 💻 Generate a simple device fingerprint
-    device_id = get_device_id():
-    # Combine IP + Streamlit session ID + user agent (if available)
-    ip = get_ip_address()
+def get_device_id():
+    # Combine IP + Streamlit session ID
+    ip = get_ip_address()  # This should be a separate function you define
     session_id = st.session_state.get("session_id", str(uuid.uuid4()))
     st.session_state["session_id"] = session_id
     raw_id = f"{ip}-{session_id}"
