@@ -14,7 +14,7 @@ def get_ip_address():
         return "unknown"
 
 # 💻 Generate a simple device fingerprint
-def get_device_id():
+    device_id = get_device_id():
     # Combine IP + Streamlit session ID + user agent (if available)
     ip = get_ip_address()
     session_id = st.session_state.get("session_id", str(uuid.uuid4()))
@@ -37,7 +37,7 @@ def has_already_voted(identifier):
             return True
     return False
 
-# ✅ Submit a vote to Firebase
+# ✅ Submit a vote to firebase
 def submit_vote(choice, voter_id):
     vote_id = str(uuid.uuid4())
     timestamp = datetime.datetime.now().isoformat()
@@ -55,7 +55,7 @@ def submit_vote(choice, voter_id):
 # 📊 Count votes by candidate
 def get_vote_stats():
     try:
-        st.write("📡 Fetching /votes from Firebase...")
+        st.write("📡 Fetching /votes from firebase...")
         votes_snapshot = db.reference("/votes").get()
 
         if not votes_snapshot:
@@ -71,5 +71,5 @@ def get_vote_stats():
         return pd.DataFrame(list(vote_counts.items()), columns=["option", "count"])
 
     except Exception as e:
-        st.error(f"❌ Firebase error: {e}")
+        st.error(f"❌ firebase error: {e}")
         return pd.DataFrame(columns=["option", "count"])
