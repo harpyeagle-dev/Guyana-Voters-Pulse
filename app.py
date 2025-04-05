@@ -1,4 +1,10 @@
 import streamlit as st
+import streamlit as st
+
+st.title("🔍 Streamlit Secrets Debug")
+
+st.write("Top-level keys:", list(st.secrets.keys()))
+st.write("Raw secrets:", dict(st.secrets))
 import datetime
 from vote_utils import (
     record_vote,
