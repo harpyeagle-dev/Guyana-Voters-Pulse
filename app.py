@@ -1,5 +1,5 @@
 import streamlit as st
-import streamlit as st
+st.set_page_config(page_title="Elections 2025 Opinion Poll", layout="wide")
 
 st.title("🔍 Streamlit Secrets Debug")
 
@@ -17,7 +17,6 @@ from vote_utils import (
 )
 from device_utils import get_device_id
 
-st.set_page_config(page_title="Elections 2025 Opinion Poll", layout="wide")
 st.title("🗳️ Elections 2025 Voter Opinion Poll")
 
 tab1, tab2, tab3 = st.tabs(["📋 Poll", "📊 Results", "🛠️ Admin"])
