@@ -9,7 +9,7 @@ def initialize_firebase():
         if not firebase_admin._apps:
             cred = credentials.Certificate({
                 "type": st.secrets["firebase"]["type"],
-                "project_id": st.secrets["firebaseE"]["project_id"],
+                "project_id": st.secrets["firebase"]["project_id"],
                 "private_key_id": st.secrets["firebase"]["private_key_id"],
                 "private_key": st.secrets["firebase"]["private_key"].replace("\\n", "\n"),
                 "client_email": st.secrets["firebase"]["client_email"],
