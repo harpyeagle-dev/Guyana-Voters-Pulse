@@ -1,5 +1,5 @@
 import streamlit as st
-st.set_page_config(page_title="Elections 2025 Opinion Poll", layout="wide")
+st.set_page_config(page_title="Secure Voting App", layout="centered")
 
 st.title("🔍 Streamlit Secrets Debug")
 
