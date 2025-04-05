@@ -4,3 +4,4 @@ streamlit-cookies-manager
 pandas
 requests
 email-validator
+streamlit-cookies-manager
