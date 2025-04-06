@@ -1,11 +1,10 @@
+import re
 import datetime
 import pandas as pd
 import streamlit as st
 from firebase_config import db
 
 def record_vote(email, data, device_id=None):
-    import re
-
     # Replace invalid Firebase key characters
     key = re.sub(r'[.#$\[\]/]', '_', email)
 
@@ -24,7 +23,7 @@ def has_already_voted(device_id):
     return False
 
 def has_email_already_voted(email):
-    key = email.replace(".", "_")
+    key = re.sub(r'[.#$\[\]/]', '_', email)
     return db.reference(f"/votes/{key}").get() is not None
 
 def get_vote_stats():
