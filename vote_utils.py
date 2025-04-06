@@ -44,3 +44,17 @@ def get_vote_sheet():
         }
         rows.append(row)
     return pd.DataFrame(rows)
+
+# ✅ Filter votes between start and end dates
+def filter_votes_by_date(start_date, end_date):
+    df = get_vote_sheet()
+    df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors="coerce")
+    mask = (df["Timestamp"] >= start_date) & (df["Timestamp"] <= end_date)
+    return df[mask]
+
+# ✅ Field distribution count (e.g., for Vote column)
+def get_field_distribution(field_name):
+    df = get_vote_sheet()
+    if field_name in df.columns:
+        return df[field_name].value_counts().to_dict()
+    return {}
