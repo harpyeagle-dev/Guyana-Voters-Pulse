@@ -1,5 +1,10 @@
 import streamlit as st
 import datetime
+import pandas as pd
+import smtplib
+from email.message import EmailMessage
+import matplotlib.pyplot as plt
+
 from vote_utils import (
     record_vote,
     has_already_voted,
@@ -11,8 +16,6 @@ from vote_utils import (
 )
 from device_utils import get_device_id
 from email_verification import send_verification_code, verify_code
-import smtplib
-from email.message import EmailMessage
 
 # ✅ MUST be the first Streamlit command
 st.set_page_config(page_title="Secure Voting App", layout="centered")
@@ -36,11 +39,30 @@ if admin_key == st.secrets["ADMIN_KEY"]["ADMIN_KEY"]:
     start_date = st.date_input("Start Date", datetime.date.today() - datetime.timedelta(days=7))
     end_date = st.date_input("End Date", datetime.date.today())
     filtered_df = filter_votes_by_date(start_date, end_date)
+
+    st.subheader("📄 Full Responses")
     st.dataframe(filtered_df)
 
-    st.subheader("Vote Summary")
-    stats = get_field_distribution("Preferred Party")
-    st.bar_chart(stats)
+    st.subheader("📊 Bar Charts")
+    for field in ["Preferred Party", "Age Group", "Region"]:
+        st.markdown(f"**{field}**")
+        counts = get_field_distribution(field)
+        st.bar_chart(counts)
+
+    st.subheader("🥧 Pie Charts")
+    for field in ["Gender", "Trust in GECOM"]:
+        st.markdown(f"**{field}**")
+        data = get_field_distribution(field)
+        fig, ax = plt.subplots()
+        ax.pie(data.values(), labels=data.keys(), autopct="%1.1f%%")
+        ax.axis("equal")
+        st.pyplot(fig)
+
+    st.subheader("📈 Votes Over Time")
+    filtered_df["timestamp"] = pd.to_datetime(filtered_df["timestamp"], errors="coerce")
+    timeline = filtered_df["timestamp"].dt.date.value_counts().sort_index()
+    st.line_chart(timeline)
+
     st.stop()
 
 # 👣 Step 1: Email entry
