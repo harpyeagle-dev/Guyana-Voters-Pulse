@@ -39,7 +39,19 @@ if admin_key == st.secrets["ADMIN_KEY"]["ADMIN_KEY"]:
     # Date filter
     start_date = st.date_input("Start Date", datetime.date.today() - datetime.timedelta(days=7))
     end_date = st.date_input("End Date", datetime.date.today())
-    filtered_df = filter_votes_by_date(start_date, end_date)
+
+    if st.button("🔄 Refresh Dashboard"):
+        st.rerun()
+
+    # Convert timestamps to dates for filtering
+    all_votes = db.reference("/votes").get() or {}
+    rows = []
+    for key, data in all_votes.items():
+        ts = pd.to_datetime(data.get("timestamp", ""), errors="coerce")
+        if ts and start_date <= ts.date() <= end_date:
+            data["timestamp"] = ts
+            rows.append(data)
+    filtered_df = pd.DataFrame(rows)
 
     st.metric("Total Votes", len(filtered_df))
 
@@ -49,20 +61,19 @@ if admin_key == st.secrets["ADMIN_KEY"]["ADMIN_KEY"]:
     st.subheader("📊 Bar Charts")
     for field in ["Preferred Party", "Age Group", "Region"]:
         st.markdown(f"**{field}**")
-        counts = get_field_distribution(field)
+        counts = filtered_df[field].value_counts()
         st.bar_chart(counts)
 
     st.subheader("🥧 Pie Charts")
     for field in ["Gender", "Trust in GECOM"]:
         st.markdown(f"**{field}**")
-        data = get_field_distribution(field)
+        data = filtered_df[field].value_counts()
         fig, ax = plt.subplots()
-        ax.pie(data.values(), labels=data.keys(), autopct="%1.1f%%")
+        ax.pie(data.values, labels=data.index, autopct="%1.1f%%")
         ax.axis("equal")
         st.pyplot(fig)
 
     st.subheader("📈 Votes Over Time")
-    filtered_df["timestamp"] = pd.to_datetime(filtered_df["timestamp"], errors="coerce")
     timeline = filtered_df["timestamp"].dt.date.value_counts().sort_index()
     st.line_chart(timeline)
 
@@ -100,7 +111,7 @@ elif st.session_state.step == "vote":
 
     party = st.radio("Which political party would you most likely support?", [
         "A New and United Guyana (ANUG)",
-        "A Partnership for National Unity (APNU)",
+        "A Partnership for National Unity + Alliance For Change (APNU+AFC)",
         "Alliance For Change (AFC)",
         "Assembly for Liberty and Prosperity (ALP)",
         "Citizens Initiative (CI)",
