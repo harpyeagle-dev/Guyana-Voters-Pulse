@@ -5,7 +5,6 @@ from firebase_config import db
 
 def record_vote(email, data, device_id=None):
     import re
-    from firebase_config import db
 
     # Replace invalid Firebase key characters
     key = re.sub(r'[.#$\[\]/]', '_', email)
