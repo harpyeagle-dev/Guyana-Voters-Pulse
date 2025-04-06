@@ -7,14 +7,14 @@ def record_vote(email, data, device_id=None):
     import re
     from firebase_config import db
 
-    # 🔑 Firebase-safe key
-    key = re.sub(r'[.#$\\[\\]/]', '_', email)
+    # Replace invalid Firebase key characters
+    key = re.sub(r'[.#$\[\]/]', '_', email)
 
     try:
         db.reference(f"/votes/{key}").set(data)
-        print(f"✅ Vote saved for {email}")
+        print(f"✅ Vote saved to Firebase as: /votes/{key}")
     except Exception as e:
-        print(f"❌ Failed to save vote for {email}: {e}")
+        print(f"❌ Failed to save vote: {e}")
         raise
 
 def has_already_voted(device_id):
