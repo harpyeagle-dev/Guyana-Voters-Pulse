@@ -41,7 +41,7 @@ if admin_key == st.secrets["ADMIN_KEY"]["ADMIN_KEY"]:
     st.bar_chart(stats)
     st.stop()
 
-# 👣 Step 1: Enter Email
+# 👣 Step 1: Email entry
 if st.session_state.step == "email":
     email = st.text_input("Enter your email to receive a verification code")
     if st.button("Send Code"):
@@ -51,19 +51,21 @@ if st.session_state.step == "email":
             send_verification_code(email)
             st.session_state.email = email
             st.session_state.step = "verify"
+    st.stop()
 
-# 👣 Step 2: Enter Verification Code
+# 👣 Step 2: Verification code
 elif st.session_state.step == "verify":
-    st.info(f"Verification code was sent to {st.session_state.email}")
+    st.info(f"Verification code sent to {st.session_state.email}")
     code = st.text_input("Enter the verification code")
-    if st.button("Verify"):
+    if st.button("Verify Code"):
         if verify_code(st.session_state.email, code):
-            st.success("Email verified successfully!")
+            st.success("✅ Verified! You may now vote.")
             st.session_state.step = "vote"
         else:
-            st.error("Invalid or expired code. Please try again.")
+            st.error("❌ Invalid or expired code. Try again.")
+    st.stop()
 
-# 👣 Step 3: Cast Vote
+# 👣 Step 3: Cast vote
 elif st.session_state.step == "vote":
     st.subheader("Please select your choice")
     choice = st.radio("Your Vote:", ["Option A", "Option B", "Option C"])
@@ -75,8 +77,9 @@ elif st.session_state.step == "vote":
             record_vote(st.session_state.email, choice, device_id)
             st.success("✅ Thank you for voting!")
             st.session_state.step = "done"
+    st.stop()
 
-# 🎉 Step 4: Acknowledge
+# 👣 Step 4: Confirmation
 elif st.session_state.step == "done":
     st.balloons()
     st.markdown("### ✅ Your response has been recorded. Thank you!")
