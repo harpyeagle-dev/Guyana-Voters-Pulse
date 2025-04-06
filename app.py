@@ -8,6 +8,7 @@ import pandas as pd
 import smtplib
 from email.message import EmailMessage
 import matplotlib.pyplot as plt
+from firebase_config import db
 
 from vote_utils import (
     record_vote,
