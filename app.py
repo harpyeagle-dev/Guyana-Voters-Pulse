@@ -96,8 +96,8 @@ elif st.session_state.step == "vote":
     st.subheader("🗳️ 2025 Voter Opinion Poll")
 
     party = st.radio("Which political party would you most likely support?", [
-        "PPP/C", "APNU+AFC", "Liberty and Justice Party (LJP)", "The New Movement (TNM)",
-        "ANUG", "WPA", "ALJ", "Other"
+        "PPP/C", "APNU", "AFC", "Liberty and Justice Party (LJP)", "The New Movement (TNM)",
+        "ANUG", "WPA", "ALP", "Other"
     ])
 
     candidates = st.text_area("Which candidate(s) do you prefer and why?")
