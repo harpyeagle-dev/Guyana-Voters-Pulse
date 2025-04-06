@@ -12,7 +12,7 @@ from vote_utils import (
 from device_utils import get_device_id
 from email_verification import send_verification_code, verify_code
 
-# ✅ Set page config at the top
+# ✅ MUST be the first Streamlit command
 st.set_page_config(page_title="Secure Voting App", layout="centered")
 
 st.title("🗳️ Guyana 2025 Voter Opinion Poll")
