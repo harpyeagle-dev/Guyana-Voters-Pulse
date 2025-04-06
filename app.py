@@ -1,4 +1,8 @@
 import streamlit as st
+
+# 🔐 Must be the first Streamlit command
+st.set_page_config(page_title="Secure Voting App", layout="centered")
+
 import datetime
 import pandas as pd
 import smtplib
@@ -16,9 +20,6 @@ from vote_utils import (
 )
 from device_utils import get_device_id
 from email_verification import send_verification_code, verify_code
-
-# ✅ MUST be the first Streamlit command
-st.set_page_config(page_title="Secure Voting App", layout="centered")
 
 st.title("🗳️ Guyana 2025 Voter Opinion Poll")
 
@@ -39,6 +40,8 @@ if admin_key == st.secrets["ADMIN_KEY"]["ADMIN_KEY"]:
     start_date = st.date_input("Start Date", datetime.date.today() - datetime.timedelta(days=7))
     end_date = st.date_input("End Date", datetime.date.today())
     filtered_df = filter_votes_by_date(start_date, end_date)
+
+    st.metric("Total Votes", len(filtered_df))
 
     st.subheader("📄 Full Responses")
     st.dataframe(filtered_df)
@@ -96,8 +99,20 @@ elif st.session_state.step == "vote":
     st.subheader("🗳️ 2025 Voter Opinion Poll")
 
     party = st.radio("Which political party would you most likely support?", [
-        "PPP/C", "APNU", "AFC", "Liberty and Justice Party (LJP)", "The New Movement (TNM)",
-        "ANUG", "WPA", "ALP", "Other"
+        "A New and United Guyana (ANUG)",
+        "A Partnership for National Unity + Alliance For Change (APNU+AFC)",
+        "Alliance For Change (AFC)",
+        "Assembly for Liberty and Prosperity (ALP)",
+        "Citizens Initiative (CI)",
+        "Guyana Action Party (GAP)",
+        "Justice For All Party (JFAP)",
+        "Liberty and Justice Party (LJP)",
+        "Organization for the Victory of the People (OVP)",
+        "People’s Progressive Party/Civic (PPP/C)",
+        "The New Movement (TNM)",
+        "United Republican Party (URP)",
+        "Working People’s Alliance (WPA)",
+        "Other"
     ])
 
     candidates = st.text_area("Which candidate(s) do you prefer and why?")
