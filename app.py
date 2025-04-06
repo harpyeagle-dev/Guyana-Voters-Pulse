@@ -100,7 +100,7 @@ elif st.session_state.step == "vote":
 
     party = st.radio("Which political party would you most likely support?", [
         "A New and United Guyana (ANUG)",
-        "A Partnership for National Unity + Alliance For Change (APNU+AFC)",
+        "A Partnership for National Unity (APNU)",
         "Alliance For Change (AFC)",
         "Assembly for Liberty and Prosperity (ALP)",
         "Citizens Initiative (CI)",
