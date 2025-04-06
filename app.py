@@ -1,10 +1,4 @@
 import streamlit as st
-st.set_page_config(page_title="Secure Voting App", layout="centered")
-
-st.title("🔍 Streamlit Secrets Debug")
-
-st.write("Top-level keys:", list(st.secrets.keys()))
-st.write("Raw secrets:", dict(st.secrets))
 import datetime
 from vote_utils import (
     record_vote,
@@ -16,73 +10,73 @@ from vote_utils import (
     get_field_distribution
 )
 from device_utils import get_device_id
+from email_verification import send_verification_code, verify_code
 
-st.title("🗳️ Elections 2025 Voter Opinion Poll")
+# ✅ Set page config at the top
+st.set_page_config(page_title="Secure Voting App", layout="centered")
 
-tab1, tab2, tab3 = st.tabs(["📋 Poll", "📊 Results", "🛠️ Admin"])
+st.title("🗳️ Guyana 2025 Voter Opinion Poll")
 
-with tab1:
-    st.header("🗳️ Cast Your Opinion")
-    email = st.text_input("Email (optional)")
-    candidate = st.radio("Preferred Candidate", ["Candidate A", "Candidate B", "Undecided"])
-    issue = st.selectbox("Top Issue", ["Economy", "Healthcare", "Education", "Security"])
-    will_vote = st.selectbox("Will you vote in 2025?", ["Yes", "No"])
-    age_group = st.selectbox("Age Range", ["18–25", "26–40", "41–60", "60+"])
+# Session state setup
+if "step" not in st.session_state:
+    st.session_state.step = "email"
+if "email" not in st.session_state:
+    st.session_state.email = ""
 
-    if st.button("Submit Response"):
-        if has_already_voted() or (email and has_email_already_voted(email)):
-            st.warning("⚠️ You've already participated in this poll.")
+# 🔐 Admin access (optional)
+st.sidebar.subheader("🔑 Admin Login")
+admin_key = st.sidebar.text_input("Enter admin key", type="password")
+if admin_key == st.secrets["ADMIN_KEY"]["ADMIN_KEY"]:
+    st.sidebar.success("Admin mode activated ✅")
+    st.header("📊 Live Vote Dashboard")
+
+    # Date filter
+    start_date = st.date_input("Start Date", datetime.date.today() - datetime.timedelta(days=7))
+    end_date = st.date_input("End Date", datetime.date.today())
+    filtered_df = filter_votes_by_date(start_date, end_date)
+    st.dataframe(filtered_df)
+
+    st.subheader("Vote Summary")
+    stats = get_field_distribution("Vote")
+    st.bar_chart(stats)
+    st.stop()
+
+# 👣 Step 1: Enter Email
+if st.session_state.step == "email":
+    email = st.text_input("Enter your email to receive a verification code")
+    if st.button("Send Code"):
+        if has_email_already_voted(email):
+            st.warning("This email has already voted.")
         else:
-            response = {
-                "vote": candidate,
-                "issue": issue,
-                "will_vote": will_vote,
-                "age_group": age_group
-            }
-            record_vote(email or f"anonymous_{get_device_id()[:8]}", response)
-            st.success("✅ Your response has been recorded!")
+            send_verification_code(email)
+            st.session_state.email = email
+            st.session_state.step = "verify"
 
-with tab2:
-    st.header("📊 Poll Results")
+# 👣 Step 2: Enter Verification Code
+elif st.session_state.step == "verify":
+    st.info(f"Verification code was sent to {st.session_state.email}")
+    code = st.text_input("Enter the verification code")
+    if st.button("Verify"):
+        if verify_code(st.session_state.email, code):
+            st.success("Email verified successfully!")
+            st.session_state.step = "vote"
+        else:
+            st.error("Invalid or expired code. Please try again.")
 
-    st.subheader("🧮 Vote Counts")
-    vote_stats = get_vote_stats()
-    if vote_stats:
-        st.bar_chart(vote_stats)
+# 👣 Step 3: Cast Vote
+elif st.session_state.step == "vote":
+    st.subheader("Please select your choice")
+    choice = st.radio("Your Vote:", ["Option A", "Option B", "Option C"])
+    if st.button("Submit Vote"):
+        device_id = get_device_id()
+        if has_already_voted(device_id):
+            st.warning("This device has already submitted a vote.")
+        else:
+            record_vote(st.session_state.email, choice, device_id)
+            st.success("✅ Thank you for voting!")
+            st.session_state.step = "done"
 
-    st.subheader("📌 Top Issues")
-    issue_stats = get_vote_stats("issue")
-    if issue_stats:
-        st.bar_chart(issue_stats)
-
-    st.subheader("👥 Age Group Breakdown")
-    age_stats = get_field_distribution("age_group")
-    if age_stats:
-        st.bar_chart(age_stats)
-
-    st.subheader("🗳️ Will You Vote in 2025?")
-    will_vote_stats = get_field_distribution("will_vote")
-    if will_vote_stats:
-        st.bar_chart(will_vote_stats)
-
-with tab3:
-    st.header("🛠️ Admin View")
-    admin_key = st.text_input("Admin Password", type="password")
-
-    if admin_key == st.secrets.get("ADMIN_KEY", "changeme"):
-        df = get_vote_sheet()
-        st.subheader("📋 Full Poll Data")
-        st.dataframe(df, use_container_width=True)
-
-        st.subheader("📆 Filter by Date")
-        start_date = st.date_input("Start Date", datetime.date.today())
-        end_date = st.date_input("End Date", datetime.date.today())
-
-        if st.button("Apply Filter"):
-            filtered_df = filter_votes_by_date(start_date, end_date)
-            st.dataframe(filtered_df, use_container_width=True)
-
-        csv = df.to_csv(index=False).encode("utf-8")
-        st.download_button("📥 Download All Responses", data=csv, file_name="elections_2025_poll_data.csv")
-    else:
-        st.warning("🔐 Enter admin password to view full results.")
+# 🎉 Step 4: Acknowledge
+elif st.session_state.step == "done":
+    st.balloons()
+    st.markdown("### ✅ Your response has been recorded. Thank you!")
