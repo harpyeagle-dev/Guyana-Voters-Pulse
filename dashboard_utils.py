@@ -14,9 +14,8 @@ def show_dashboard():
         return
 
     # 📆 Filter by date
-    start = st.date_input("Start Date", value=pd.Timestamp.today().date())
-    end = st.date_input("End Date", value=pd.Timestamp.today().date())
-    filtered = filter_votes_by_date(start, end)
+    start = st.date_input("Start Date", value=pd.Timestamp.today().date(), key="start_date")
+    end = st.date_input("End Date", value=pd.Timestamp.today().date(), key="end_date")
 
     st.markdown(f"### 📈 Showing {len(filtered)} responses from {start} to {end}")
 
