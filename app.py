@@ -6,7 +6,7 @@ st.set_page_config(page_title="Secure Voting App", layout="centered")
 import datetime
 import pandas as pd
 import smtplib
-from email.message import EmailMessage
+from email_verification import send_verification_code, verify_code
 import matplotlib.pyplot as plt
 from firebase_config import db
 from dashboard_utils import show_dashboard
