@@ -13,9 +13,16 @@ def show_dashboard():
         st.warning("No votes yet.")
         return
 
-    # 📆 Filter by date
+    # 📆 Filter by date with unique keys
     start = st.date_input("Start Date", value=pd.Timestamp.today().date(), key="start_date")
     end = st.date_input("End Date", value=pd.Timestamp.today().date(), key="end_date")
+
+    try:
+        filtered = filter_votes_by_date(start, end)
+    except Exception as e:
+        st.error("❌ Failed to filter votes by date.")
+        st.exception(e)
+        return
 
     st.markdown(f"### 📈 Showing {len(filtered)} responses from {start} to {end}")
 
