@@ -9,6 +9,7 @@ import smtplib
 from email.message import EmailMessage
 import matplotlib.pyplot as plt
 from firebase_config import db
+from dashboard_utils import show_dashboard
 
 from vote_utils import (
     record_vote,
@@ -35,7 +36,7 @@ st.sidebar.subheader("🔑 Admin Login")
 admin_key = st.sidebar.text_input("Enter admin key", type="password")
 if admin_key == st.secrets["ADMIN_KEY"]["ADMIN_KEY"]:
     st.sidebar.success("Admin mode activated ✅")
-    st.header("📊 Live Vote Dashboard")
+    show_dashboard()  # ⬅️ displays the full admin dashboard
 
     # Date filter
     start_date = st.date_input("Start Date", datetime.date.today() - datetime.timedelta(days=7))
