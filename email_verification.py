@@ -10,6 +10,8 @@ def send_verification_code(email):
     key = sanitize_key(email)
 
     try:
+        st.warning(f"📨 Preparing to send code {code} to {email}")
+
         # ✅ Save code to Firebase
         db.reference(f"/auth_codes/{key}").set({
             "code": code,
@@ -29,13 +31,12 @@ def send_verification_code(email):
             "Content-Type": "application/json"
         }
 
-        response = requests.post("https://api.resend.com/emails", json=payload, headers=headers)
-
-        if response.status_code == 200:
-            st.success(f"📨 Code sent to {email} via Resend")
-        else:
-            st.error(f"❌ Resend error: {response.status_code}")
-            st.write(response.json())
+        try:
+            response = requests.post("https://api.resend.com/emails", json=payload, headers=headers)
+            st.warning(f"📬 Resend response: {response.status_code} {response.text}")
+        except Exception as e:
+            st.error("❌ Resend email send failed")
+            st.exception(e)
 
     except Exception as e:
         st.error("❌ Failed to send verification code")
