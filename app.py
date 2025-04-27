@@ -28,15 +28,13 @@ if st.session_state.step == "email":
     email = st.text_input("Enter your email to receive a verification code")
 
     if st.button("Send Verification Code"):
-        st.warning("📤 Send Code button clicked")
         if has_email_already_voted(email):
             st.warning("⚠️ This email has already voted.")
         else:
-            st.warning("📥 Attempting to send verification code...")
             send_verification_code(email)
-            st.warning("✅ Verification code sent (or attempted to send)")
             st.session_state.email = email
             st.session_state.step = "verify"
+            st.rerun()  # ✅ force rerun to move to code input
 
 # 🔹 Step 2: Verify Code
 elif st.session_state.step == "verify":
