@@ -12,16 +12,17 @@ from vote_utils import (
 from device_utils import get_device_id
 from email_verification import send_verification_code, verify_code
 
-# ✅ Set page config FIRST
+# ✅ MUST be the very first Streamlit command
 st.set_page_config(page_title="Secure Voting App", layout="centered")
 
-# ✅ Force starting step
+# ✅ Initialize the app session state
 if "step" not in st.session_state:
     st.session_state.step = "email"
 
-st.warning(f"Current Step: {st.session_state.get('step')}")  # Debug current step
+# ✅ Debugging step (after set_page_config)
+st.warning(f"Current Step: {st.session_state.get('step')}")
 
-# ✅ Step 1: Email entry
+# 🔹 Step 1: Enter Email
 if st.session_state.step == "email":
     st.subheader("🔐 Voter Email Verification")
     email = st.text_input("Enter your email to receive a verification code")
@@ -37,7 +38,7 @@ if st.session_state.step == "email":
             st.session_state.email = email
             st.session_state.step = "verify"
 
-# ✅ Step 2: Code verification
+# 🔹 Step 2: Verify Code
 elif st.session_state.step == "verify":
     st.subheader("📩 Enter Verification Code")
     code = st.text_input("Enter the 6-digit code sent to your email")
@@ -49,7 +50,7 @@ elif st.session_state.step == "verify":
         else:
             st.error("❌ Invalid or expired code. Please try again.")
 
-# ✅ Step 3: Voting form
+# 🔹 Step 3: Vote Form
 elif st.session_state.step == "vote":
     st.subheader("🗳️ Submit Your Vote")
     device_id = get_device_id()
@@ -58,11 +59,12 @@ elif st.session_state.step == "vote":
         st.warning("⚠️ This device has already voted.")
     else:
         party = st.selectbox("Preferred Political Party", [
-            "A Partnership for National Unity (APNU)",
-            "Assembly for Liberty and Prosperity (ALJ)",
             "A New and United Guyana (ANUG)",
+            "Assembly for Liberty and Prosperity (ALJ)",
             "Guyana Action Party (GAP)",
+            "Guyana Agricultural and General Workers Union (GAWU)",
             "People's Progressive Party (PPP)",
+            "People’s National Congress Reform (PNCR)",
             "The Citizenship Initiative (TCI)",
             "The Justice For All Party (JFAP)",
             "The New Movement (TNM)",
@@ -118,12 +120,12 @@ elif st.session_state.step == "vote":
             st.success("🎉 Your vote has been recorded! Thank you for participating.")
             st.session_state.step = "completed"
 
-# ✅ Step 4: Confirmation screen
+# 🔹 Step 4: Thank you screen
 elif st.session_state.step == "completed":
     st.header("🎉 Thank you for voting!")
     st.write("Your response has been recorded successfully.")
 
-# ✅ Admin dashboard (sidebar)
+# 🔹 Admin Dashboard Access
 st.sidebar.subheader("🔑 Admin Login")
 admin_key = st.sidebar.text_input("Enter admin key", type="password")
 if admin_key == st.secrets["ADMIN_KEY"]["ADMIN_KEY"]:
@@ -133,12 +135,12 @@ if admin_key == st.secrets["ADMIN_KEY"]["ADMIN_KEY"]:
     all_votes = get_vote_sheet()
     st.dataframe(all_votes)
 
-    # Distribution by Party
+    # Vote Distribution
     st.subheader("🗳️ Vote Distribution by Party")
     party_dist = get_field_distribution("Vote")
     st.bar_chart(party_dist)
 
-    # Distribution by Issue
+    # Top Issues
     st.subheader("🔥 Top National Issues")
     issue_dist = get_field_distribution("Issue")
     st.bar_chart(issue_dist)
@@ -148,7 +150,7 @@ if admin_key == st.secrets["ADMIN_KEY"]["ADMIN_KEY"]:
     trust_dist = get_field_distribution("Trust in GECOM")
     st.bar_chart(trust_dist)
 
-    # Optional: Filter by Date
+    # Date filter
     st.subheader("📅 Filter Votes by Date Range")
     start = st.date_input("Start Date", key="start_date")
     end = st.date_input("End Date", key="end_date")
