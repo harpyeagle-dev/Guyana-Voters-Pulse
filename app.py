@@ -45,6 +45,7 @@ elif st.session_state.step == "verify":
         if verify_code(st.session_state.email, code):
             st.success("✅ Verification successful!")
             st.session_state.step = "vote"
+            st.rerun()
         else:
             st.error("❌ Invalid or expired code. Please try again.")
 
