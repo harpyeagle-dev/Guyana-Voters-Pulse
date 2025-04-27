@@ -1,5 +1,13 @@
 import streamlit as st
 import datetime
+import matplotlib.pyplot as plt
+
+def draw_pie_chart(series, title):
+    fig, ax = plt.subplots()
+    ax.pie(series, labels=series.index, autopct='%1.1f%%', startangle=90)
+    ax.axis('equal')
+    ax.set_title(title)
+    return fig
 from vote_utils import (
     record_vote,
     has_already_voted,
