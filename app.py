@@ -43,13 +43,13 @@ elif st.session_state.step == "verify":
     code = st.text_input("Enter the 6-digit code sent to your email")
 
     if st.button("Verify Code"):
-        with st.spinner("Verifying code..."):
-            if verify_code(st.session_state.email, code):
-             st.success("✅ Verification successful!")
-             st.session_state.step = "vote"
-             st.rerun()
-         else:
-             st.error("❌ Invalid or expired code. Please try again.")
+    with st.spinner("Verifying code..."):
+        if verify_code(st.session_state.email, code):
+            st.success("✅ Verification successful!")
+            st.session_state.step = "vote"
+            st.rerun()
+        else:
+            st.error("❌ Invalid or expired code. Please try again.")
 
 # 🔹 Step 3: Vote Form
 elif st.session_state.step == "vote":
