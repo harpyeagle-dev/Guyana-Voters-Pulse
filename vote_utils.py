@@ -1,19 +1,11 @@
-import re
 import datetime
 import pandas as pd
-import streamlit as st
+import re
 from firebase_config import db
 
 def record_vote(email, data, device_id=None):
-    # Replace invalid Firebase key characters
     key = re.sub(r'[.#$\[\]/]', '_', email)
-
-    try:
-        db.reference(f"/votes/{key}").set(data)
-        print(f"✅ Vote saved to Firebase as: /votes/{key}")
-    except Exception as e:
-        print(f"❌ Failed to save vote: {e}")
-        raise
+    db.reference(f"/votes/{key}").set(data)
 
 def has_already_voted(device_id):
     votes = db.reference("/votes").get() or {}
