@@ -28,6 +28,7 @@ if st.session_state.step == "email":
     email = st.text_input("Enter your email to receive a verification code")
 
     if st.button("Send Verification Code"):
+        with st.spinner("Sending verification code..."):
         if has_email_already_voted(email):
             st.warning("⚠️ This email has already voted.")
         else:
@@ -42,6 +43,7 @@ elif st.session_state.step == "verify":
     code = st.text_input("Enter the 6-digit code sent to your email")
 
     if st.button("Verify Code"):
+    with st.spinner("Verifying code..."):
         if verify_code(st.session_state.email, code):
             st.success("✅ Verification successful!")
             st.session_state.step = "vote"
