@@ -43,8 +43,8 @@ elif st.session_state.step == "verify":
     code = st.text_input("Enter the 6-digit code sent to your email")
 
     if st.button("Verify Code"):
-    with st.spinner("Verifying code..."):
-        if verify_code(st.session_state.email, code):
+        with st.spinner("Verifying code..."):
+            if verify_code(st.session_state.email, code):
             st.success("✅ Verification successful!")
             st.session_state.step = "vote"
             st.rerun()
