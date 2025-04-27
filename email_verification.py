@@ -10,6 +10,7 @@ def sanitize_key(email):
     return re.sub(r'[.#$\[\]/]', '_', email.split('@')[0])
 
 def send_verification_code(email):
+    print(f"🚀 Sending verification code to: {email}")
     code = str(random.randint(100000, 999999))
     expiry = (datetime.datetime.now() + datetime.timedelta(minutes=10)).isoformat()
     key = sanitize_key(email)
