@@ -48,7 +48,7 @@ elif st.session_state.step == "verify":
              st.success("✅ Verification successful!")
              st.session_state.step = "vote"
              st.rerun()
-        else:
+         else:
              st.error("❌ Invalid or expired code. Please try again.")
 
 # 🔹 Step 3: Vote Form
