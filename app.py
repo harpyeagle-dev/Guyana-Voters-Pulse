@@ -32,10 +32,10 @@ if st.session_state.step == "email":
             st.warning("⚠️ This email has already voted.")
         else:
             with st.spinner("Sending verification code..."):
-            send_verification_code(email)
-            st.session_state.email = email
-            st.session_state.step = "verify"
-            st.rerun()  # ✅ force rerun to move to code input
+             send_verification_code(email)
+             st.session_state.email = email
+             st.session_state.step = "verify"
+             st.rerun()  # ✅ force rerun to move to code input
 
 # 🔹 Step 2: Verify Code
 elif st.session_state.step == "verify":
