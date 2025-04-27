@@ -164,23 +164,56 @@ elif st.session_state.step == "completed":
     st.success("Your opinion has been recorded.")
 
 # ✅ Admin Dashboard
+# ✅ Admin Dashboard
 if is_admin:
-    st.header("📊 Live Voter Dashboard")
+    st.title("📊 Elections 2025 Admin Dashboard")
 
     tab1, tab2, tab3 = st.tabs(["Votes Summary", "Vote Sheet", "Filter by Date"])
 
     with tab1:
-        st.subheader("Vote Counts")
+        st.subheader("📈 Party Preference")
         vote_counts = get_vote_stats()
         st.bar_chart(vote_counts)
 
+        df_votes = get_vote_sheet()
+
+        if not df_votes.empty:
+
+            # 🔥 Top Issues
+            st.subheader("📋 Top Issues")
+            issues_series = df_votes.explode('Issues')["Issues"].value_counts()
+            st.bar_chart(issues_series)
+
+            # 🔥 Trust in GECOM
+            st.subheader("🛡️ Trust in GECOM")
+            trust_counts = df_votes["Trust in GECOM"].value_counts()
+            st.pyplot(draw_pie_chart(trust_counts, "Trust in GECOM"))
+
+            # 🔥 Age Group
+            st.subheader("🎂 Age Distribution")
+            age_counts = df_votes["Age Group"].value_counts()
+            st.pyplot(draw_pie_chart(age_counts, "Age Group"))
+
+            # 🔥 Gender
+            st.subheader("🚻 Gender Distribution")
+            gender_counts = df_votes["Gender"].value_counts()
+            st.pyplot(draw_pie_chart(gender_counts, "Gender"))
+
+            # 🔥 Region
+            st.subheader("🗺️ Region Distribution")
+            region_counts = df_votes["Region"].value_counts()
+            st.bar_chart(region_counts)
+        
+        else:
+            st.info("No votes recorded yet.")
+
     with tab2:
-        st.subheader("All Votes")
+        st.subheader("📋 Full Vote Sheet")
         df_votes = get_vote_sheet()
         st.dataframe(df_votes)
 
     with tab3:
-        st.subheader("Filter Votes by Date")
+        st.subheader("📅 Filter Votes by Date")
         start_date = st.date_input("Start Date", key="start")
         end_date = st.date_input("End Date", key="end")
         if start_date and end_date:
