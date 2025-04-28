@@ -84,11 +84,11 @@ elif st.session_state.step == "vote":
     st.subheader("Please fill out your selections:")
 
     party = st.selectbox("Preferred Political Party", [
+        "A Partnership for National Unity (APNU)",
         "Assembly for Liberty and Prosperity (ALP)",
         "A New and United Guyana (ANUG)",
         "Justice for All Party (JFAP)",
         "People's Progressive Party/Civic (PPP/C)",
-        "People's National Congress Reform (PNC/R)",
         "The New Movement (TNM)",
         "The Citizenship Initiative (TCI)",
         "United Republican Party (URP)",
