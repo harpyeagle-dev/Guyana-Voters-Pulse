@@ -96,8 +96,8 @@ elif st.session_state.step == "vote":
         "Working People's Alliance (WPA)",  
     ])
 
-    candidate = st.text_input("Preferred Candidate and why")
-    candidate = st.text_input("Give Reasons")
+    candidate = st.text_input("Preferred Candidate")
+    candidate = st.text_input("Give reasons for your choice of preferred candidate")
     
     issues = st.multiselect(
         "Top Issues You Care About",
