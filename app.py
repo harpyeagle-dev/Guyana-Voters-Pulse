@@ -118,7 +118,8 @@ elif st.session_state.step == "vote":
             "Improved Infrastructure",
             "Agriculture Development",
             "Sports Policy",
-            "Cultural Policy"
+            "Cultural Policy",
+            "Health Care"
         ]
     )
 
