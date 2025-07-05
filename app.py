@@ -111,7 +111,14 @@ elif st.session_state.step == "vote":
             "Cost of Living",
             "Corruption",
             "Environment",
-            "Political Stability"
+            "Political Stability",
+            "Constitutional Reform",
+            "Regional (rural/hinterland) Development",
+            "Improved Utility Services (Electricity, Water)",
+            "Improved Infrastructure",
+            "Agriculture Development",
+            "Sports Policy",
+            "Cultural Policy"
         ]
     )
 
