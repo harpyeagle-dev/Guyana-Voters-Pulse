@@ -97,7 +97,8 @@ elif st.session_state.step == "vote":
     ])
 
     candidate = st.text_input("Preferred Candidate and why")
-
+    candidate = st.text_input("Give Reasons")
+    
     issues = st.multiselect(
         "Top Issues You Care About",
         [
