@@ -92,8 +92,8 @@ elif st.session_state.step == "vote":
         "The New Movement (TNM)",
         "The Citizenship Initiative (TCI)",
         "United Republican Party (URP)",
-        "Working People's Alliance (WPA)",
-        "We Invest In Nationhood (WIN)"
+        "We Invest In Nationhood (WIN)",
+        "Working People's Alliance (WPA)",  
     ])
 
     candidate = st.text_input("Preferred Candidate and why")
