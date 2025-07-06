@@ -40,7 +40,7 @@ admin_key_input = st.sidebar.text_input("Enter Admin Key", type="password")
 
 if admin_key_input == "admin123":
     st.sidebar.success("Access granted")
-    df = get_vote_sheet()
+    df = get_vote_sheet(db)
 
     st.title("📊 Admin Dashboard")
     st.subheader("Filter Responses")
@@ -96,7 +96,7 @@ if st.session_state.step == "email":
     st.write("Enter your email to receive a one-time code to vote:")
     email = st.text_input("Email")
     if st.button("Send Code"):
-        if has_email_already_voted(email):
+        if has_email_already_voted(email, db):
             st.error("This email has already voted.")
         else:
             send_verification_code(email)
@@ -182,7 +182,7 @@ elif st.session_state.step == "vote":
 
     if st.button("Submit Vote"):
         device_id = get_device_id()
-        if has_already_voted(device_id):
+        if has_already_voted(device_id, db):
             st.error("This device has already voted.")
         else:
             vote = {
