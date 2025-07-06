@@ -84,16 +84,30 @@ elif st.session_state.step == "vote":
     st.subheader("Please fill out your selections:")
 
     party = st.selectbox("Preferred Political Party", [
+        "All America Alliance for Guyana (AAA4G)",
+        "A Guyana National Service Party (AGNSP)",
         "A Partnership for National Unity (APNU)",
         "Assembly for Liberty and Prosperity (ALP)",
         "A New and United Guyana (ANUG)",
+        "Citizen United (CU)",
+        "Democratic Peoples Party (DPR)",
+        "Destiny To Oneness (DTO)",
+        "Guyanese for Accouuntability, Meritocracy, Equality, Reform, Inclusion and Collaboration with America (GAMERICA)",
+        "Guyana Unity Party (GUP)",
+        "Horizon and Star (HAS)",
         "Justice for All Party (JFAP)",
         "People's Progressive Party/Civic (PPP/C)",
-        "The New Movement (TNM)",
         "The Citizenship Initiative (TCI)",
+        "The New Movement (TNM)",
+        "The Republic Party of Guyana (PRG)",
+        "United Workers Party (UWP)",
+        "Unity Guyana Democratic Party (UGDP)",
         "United Republican Party (URP)",
+        "Unity Movement (UM)",
+        "Unity One (UO)",
+        "United Peoples Party (UPP)",
         "We Invest In Nationhood (WIN)",
-        "Working People's Alliance (WPA)",  
+        "Working People's Alliance (WPA)",
     ])
 
     candidate = st.text_input("Preferred Candidate")
