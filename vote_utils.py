@@ -17,7 +17,12 @@ def get_vote_stats():
     return {}
 
 def get_vote_sheet():
-    return []
+    from firebase_admin import firestore
+    db = firestore.client()
+    votes_ref = db.collection("votes")
+    docs = votes_ref.stream()
+    data = [doc.to_dict() for doc in docs]
+    return pd.DataFrame(data)[]
 
 def filter_votes_by_date(df, start_date, end_date):
     return df
