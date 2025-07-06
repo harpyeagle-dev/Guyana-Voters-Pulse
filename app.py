@@ -17,15 +17,11 @@ from vote_utils import (
 from device_utils import get_device_id
 from email_verification import send_verification_code, verify_code
 
-# Page setup
 st.set_page_config(page_title="Guyana Voters Pulse", layout="centered")
 
 # Initialize Firebase
-import firebase_admin
-from firebase_admin import credentials, firestore
-
 if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase_credentials.json")  # update path as needed
+    cred = credentials.Certificate("firebase_credentials.json")  # Replace with your file path
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
@@ -49,6 +45,10 @@ if admin_key_input == "admin123":
     df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
     filtered_df = df[(df["timestamp"] >= pd.to_datetime(start_date)) & (df["timestamp"] <= pd.to_datetime(end_date))]
 
+    if filtered_df.empty:
+        st.warning("⚠️ No data in selected date range.")
+        st.stop()
+
     age_filter = st.selectbox("Filter by Age", ["All"] + sorted(df["age"].dropna().unique().tolist()))
     region_filter = st.selectbox("Filter by Region", ["All"] + sorted(df["region"].dropna().unique().tolist()))
     trust_filter = st.selectbox("Trust in GECOM", ["All", "Yes", "No", "Not sure"])
@@ -62,26 +62,13 @@ if admin_key_input == "admin123":
 
     st.write("Filtered Responses:", len(filtered_df))
     st.dataframe(filtered_df)
-
     st.download_button("📥 Download CSV", data=filtered_df.to_csv(index=False), file_name="filtered_votes.csv")
-
-    # Insert your chart/graph code here (pie, bar, line)
-
-    st.success("✅ Admin mode activated. Voter form hidden.")
-    st.stop()  # 👈 Prevents the rest of the app from running
-
-else:
-    st.sidebar.info("Enter admin key to access the dashboard")
-
-    # Charts
-    st.subheader("📈 Visual Summaries")
 
     def plot_bar(series, title):
         st.write(title)
         st.bar_chart(series.dropna().value_counts())
 
     def plot_pie(series, title):
-        import matplotlib.pyplot as plt
         fig, ax = plt.subplots()
         series = series.dropna()
         ax.pie(series.value_counts(), labels=series.value_counts().index, autopct='%1.1f%%')
@@ -93,6 +80,7 @@ else:
         timeline = df["timestamp"].dt.date.value_counts().sort_index()
         st.line_chart(timeline)
 
+    st.subheader("📊 Visual Summaries")
     plot_line(filtered_df, "🗓️ Vote Submissions Over Time")
     plot_pie(filtered_df["party"], "🧑 Party Preference")
     plot_pie(filtered_df["gender"], "⚖️ Gender Distribution")
@@ -109,7 +97,6 @@ else:
     if "candidate" in filtered_df.columns and "candidate_reason" in filtered_df.columns:
         st.dataframe(filtered_df[["candidate", "candidate_reason"]].dropna())
 
-    # PR System Opinions
     st.subheader("🗳️ PR System Opinions")
     pr_questions = [
         "pr_understand_system",
@@ -120,12 +107,20 @@ else:
         "require_majority_to_govern",
         "qualified_majority_to_govern"
     ]
-
     for q in pr_questions:
         if q in filtered_df.columns:
             plot_bar(filtered_df[q], q.replace('_', ' ').capitalize())
 
-# Main Voting Page
+    st.stop()
+
+# Voter Flow
+if "step" not in st.session_state:
+    st.session_state.step = "email"
+if "email" not in st.session_state:
+    st.session_state.email = ""
+if "vote_submitted" not in st.session_state:
+    st.session_state.vote_submitted = False
+
 if st.session_state.step == "email":
     st.title("Guyana Voters Pulse 🗳️")
     st.write("Enter your email to receive a one-time code to vote:")
@@ -150,70 +145,56 @@ elif st.session_state.step == "verify":
 elif st.session_state.step == "vote":
     st.header("Your Vote")
     party = st.selectbox("Preferred Political Party", [
-    "All America Alliance for Guyana (AAA4G)",
-    "A Guyana National Service Party (AGNSP)",
-    "A Partnership for National Unity (APNU)",
-    "Assembly for Liberty and Prosperity (ALP)",
-    "A New and United Guyana (ANUG)",
-    "Citizen United (CU)",
-    "Democratic Peoples Party (DPR)",
-    "Destiny To Oneness (DTO)",
-    "Guyanese for Accouuntability, Meritocracy, Equality, Reform, Inclusion and Collaboration with America (GAMERICA)",
-    "Guyana Unity Party (GUP)",
-    "Horizon and Star (HAS)",
-    "Justice for All Party (JFAP)",
-    "People's Progressive Party/Civic (PPP/C)",
-    "The Citizenship Initiative (TCI)",
-    "The New Movement (TNM)",
-    "The Republic Party of Guyana (PRG)",
-    "United Workers Party (UWP)",
-    "Unity Guyana Democratic Party (UGDP)",
-    "United Republican Party (URP)",
-    "Unity Movement (UM)",
-    "Unity One (UO)",
-    "United Peoples Party (UPP)",
-    "We Invest In Nationhood (WIN)",
-    "Working People's Alliance (WPA)"
-])
+        "All America Alliance for Guyana (AAA4G)",
+        "A Guyana National Service Party (AGNSP)",
+        "A Partnership for National Unity (APNU)",
+        "Assembly for Liberty and Prosperity (ALP)",
+        "A New and United Guyana (ANUG)",
+        "Citizen United (CU)",
+        "Democratic Peoples Party (DPR)",
+        "Destiny To Oneness (DTO)",
+        "Guyanese for Accouuntability, Meritocracy, Equality, Reform, Inclusion and Collaboration with America (GAMERICA)",
+        "Guyana Unity Party (GUP)",
+        "Horizon and Star (HAS)",
+        "Justice for All Party (JFAP)",
+        "People's Progressive Party/Civic (PPP/C)",
+        "The Citizenship Initiative (TCI)",
+        "The New Movement (TNM)",
+        "The Republic Party of Guyana (PRG)",
+        "United Workers Party (UWP)",
+        "Unity Guyana Democratic Party (UGDP)",
+        "United Republican Party (URP)",
+        "Unity Movement (UM)",
+        "Unity One (UO)",
+        "United Peoples Party (UPP)",
+        "We Invest In Nationhood (WIN)",
+        "Working People's Alliance (WPA)"
+    ])
     candidate = st.text_input("Preferred Candidate (if any)")
     candidate_reason = st.text_area("Why did you choose this candidate?", placeholder="Explain your reason...")
     issues = st.multiselect(
-    "Top Issues You Care About",
-    [
-        "Education",
-        "Healthcare",
-        "Jobs and Economy",
-        "Security and Crime",
-        "Oil and Gas Management",
-        "Renegotiate the 2016 PSA Oil Contract",
-        "Infrastructure",
-        "Cost of Living",
-        "Corruption",
-        "Environment",
-        "Political Stability",
-        "Constitutional Reform",
-        "Regional (rural/hinterland) Development",
-        "Improved Utility Services (Electricity, Water)",
-        "Improved Infrastructure",
-        "Agriculture Development",
-        "Sports Policy",
-        "Cultural Policy",
-        "Health Care"
-    ]
-)
+        "Top Issues You Care About",
+        [
+            "Education", "Healthcare", "Jobs and Economy", "Security and Crime",
+            "Oil and Gas Management", "Renegotiate the 2016 PSA Oil Contract", "Infrastructure",
+            "Cost of Living", "Corruption", "Environment", "Political Stability", "Constitutional Reform",
+            "Regional (rural/hinterland) Development", "Improved Utility Services (Electricity, Water)",
+            "Improved Infrastructure", "Agriculture Development", "Sports Policy", "Cultural Policy", "Health Care"
+        ]
+    )
     trust_gecom = st.radio("Do you trust GECOM to run a free and fair election?", ["Yes", "No", "Not sure"])
     age = st.selectbox("Age Group", ["18-24", "25-34", "35-44", "45-54", "55+"])
     gender = st.selectbox("Gender", ["Male", "Female", "Non-binary", "Prefer not to say"])
-    region = st.selectbox("Region", ["Region 1", "Region 2", "Region 3", "Region 4", "Region 5", "Region 6", "Region 7", "Region 8", "Region 9", "Region 10"])
+    region = st.selectbox("Region", [f"Region {i}" for i in range(1, 11)])
 
     st.header("🗳️ The List PR System")
     q1 = st.radio("Do you understand how the system works?", ["Yes", "No", "Not sure"])
     q2 = st.radio("Do you understand how seats are allocated?", ["Yes", "No", "Not sure"])
     q3 = st.radio("Would you prefer to vote for an individual candidate instead of a list?", ["Yes", "No", "Not sure"])
     q4 = st.radio("Are you satisfied with how your interests are represented in Parliament?", ["Yes", "No", "Not sure"])
-    q5 = st.radio("Should parties be allowed to negotiate coalitions to form the government after elections (as happens everywhere else where PR is practised)?", ["Yes", "No", "Not sure"])
-    q6 = st.radio("Should the achievement of a majority be a requirement to form the government (as is typical of List PR systems worldwide)?", ["Yes", "No", "Not sure"])
-    q7 = st.radio("Should a qualified majority (support of 60+ percent of representatives) be required to form the government (as in Suriname where it is 67 percent)?", ["Yes", "No", "Not sure"])
+    q5 = st.radio("Should parties be allowed to negotiate coalitions to form the government after elections?", ["Yes", "No", "Not sure"])
+    q6 = st.radio("Should the achievement of a majority be a requirement to form the government?", ["Yes", "No", "Not sure"])
+    q7 = st.radio("Should a qualified majority (support of 60+ percent of representatives) be required to form the government?", ["Yes", "No", "Not sure"])
 
     if st.button("Submit Vote"):
         device_id = get_device_id()
@@ -241,12 +222,11 @@ elif st.session_state.step == "vote":
                 "device_id": device_id
             }
             record_vote(vote, db)
-            st.write("📤 Vote sent to Firebase:", vote)
             st.session_state.vote_submitted = True
             st.success("Thank you! Your vote has been recorded.")
+            st.balloons()
             st.session_state.step = "done"
 
 elif st.session_state.step == "done":
     st.header("🎉 Vote Submitted")
     st.write("Thank you for participating in the Guyana Voters Pulse!")
-    st.balloons()
