@@ -196,7 +196,7 @@ elif st.session_state.step == "vote":
                 "timestamp": datetime.datetime.now().isoformat(),
                 "device_id": device_id
             }
-            record_vote(vote)
+            record_vote(vote, db)
             st.session_state.vote_submitted = True
             st.success("Thank you! Your vote has been recorded.")
             st.session_state.step = "done"
