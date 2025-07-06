@@ -240,6 +240,7 @@ elif st.session_state.step == "vote":
                 "device_id": device_id
             }
             record_vote(vote, db)
+            st.write("📤 Vote sent to Firebase:", vote)
             st.session_state.vote_submitted = True
             st.success("Thank you! Your vote has been recorded.")
             st.session_state.step = "done"
