@@ -35,24 +35,30 @@ if "vote_submitted" not in st.session_state:
     st.session_state.vote_submitted = False
 
 # Admin Dashboard
-st.sidebar.title("🔧 Admin Access")
-admin_key_input = st.sidebar.text_input("Enter Admin Key", type="password")
+st.sidebar.success("Access granted")
 
-if admin_key_input == "admin123":
-    st.sidebar.success("Access granted")
-    df = get_vote_sheet(db)
+st.title("📊 Admin Dashboard")
+st.subheader("Filter Responses")
 
-    st.title("📊 Admin Dashboard")
-    st.subheader("Filter Responses")
+# Filters
+start_date = st.date_input("Start Date", datetime.date(2025, 1, 1))
+end_date = st.date_input("End Date", datetime.date.today())
+df = get_vote_sheet(db)
 
-    start_date = st.date_input("Start Date", datetime.date(2025, 1, 1))
-    end_date = st.date_input("End Date", datetime.date.today())
+if df.empty:
+    st.warning("⚠️ No votes found.")
+else:
+    df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+    df = df.dropna(subset=["timestamp"])
+    filtered_df = df[
+        (df["timestamp"] >= pd.to_datetime(start_date)) &
+        (df["timestamp"] <= pd.to_datetime(end_date))
+    ]
+
     age_filter = st.selectbox("Filter by Age", ["All"] + sorted(df["age"].dropna().unique().tolist()))
     region_filter = st.selectbox("Filter by Region", ["All"] + sorted(df["region"].dropna().unique().tolist()))
     trust_filter = st.selectbox("Trust in GECOM", ["All", "Yes", "No", "Not sure"])
 
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
-    filtered_df = df[(df["timestamp"] >= pd.to_datetime(start_date)) & (df["timestamp"] <= pd.to_datetime(end_date))]
     if age_filter != "All":
         filtered_df = filtered_df[filtered_df["age"] == age_filter]
     if region_filter != "All":
@@ -60,35 +66,63 @@ if admin_key_input == "admin123":
     if trust_filter != "All":
         filtered_df = filtered_df[filtered_df["trust_gecom"] == trust_filter]
 
+    st.write("Filtered Responses:", len(filtered_df))
     st.dataframe(filtered_df)
 
-    st.subheader("📊 Summary Charts")
-    st.write("### Preferred Political Party")
-    st.bar_chart(filtered_df["party"].value_counts())
+    # Download
+    st.download_button("📥 Download CSV", data=filtered_df.to_csv(index=False), file_name="filtered_votes.csv")
 
-    st.write("### Trust in GECOM")
-    st.bar_chart(filtered_df["trust_gecom"].value_counts())
+    # Charts
+    st.subheader("📈 Visual Summaries")
 
-    st.write("### Top Issues")
-    st.text("(Note: Multiple selections are split by comma)")
-    all_issues = filtered_df["issues"].dropna().str.split(", ").explode()
-    st.bar_chart(all_issues.value_counts())
+    def plot_bar(series, title):
+        st.write(title)
+        st.bar_chart(series.dropna().value_counts())
 
-    st.write("### Preferred Candidate Reasons")
-    st.dataframe(filtered_df[["candidate", "candidate_reason"]].dropna())
+    def plot_pie(series, title):
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        series = series.dropna()
+        ax.pie(series.value_counts(), labels=series.value_counts().index, autopct='%1.1f%%')
+        ax.set_title(title)
+        st.pyplot(fig)
 
-    st.write("### PR System Understanding and Opinions")
-    st.bar_chart(filtered_df["pr_understand_system"].value_counts())
-    st.bar_chart(filtered_df["pr_understand_allocation"].value_counts())
-    st.bar_chart(filtered_df["prefer_individual_candidate"].value_counts())
-    st.bar_chart(filtered_df["satisfied_representation"].value_counts())
-    st.bar_chart(filtered_df["allow_coalition_negotiation"].value_counts())
-    st.bar_chart(filtered_df["require_majority_to_govern"].value_counts())
-    st.bar_chart(filtered_df["qualified_majority_to_govern"].value_counts())
+    def plot_line(df, title):
+        st.write(title)
+        timeline = df["timestamp"].dt.date.value_counts().sort_index()
+        st.line_chart(timeline)
 
-    st.download_button("Download CSV", data=filtered_df.to_csv(index=False), file_name="filtered_votes.csv")
-else:
-    st.sidebar.warning("Admin access required")
+    plot_line(filtered_df, "🗓️ Vote Submissions Over Time")
+    plot_pie(filtered_df["party"], "🧑 Party Preference")
+    plot_pie(filtered_df["gender"], "⚖️ Gender Distribution")
+    plot_bar(filtered_df["region"], "🌍 Regional Distribution")
+    plot_bar(filtered_df["age"], "🎂 Age Distribution")
+    plot_bar(filtered_df["trust_gecom"], "✅ Trust in GECOM")
+
+    if "issues" in filtered_df.columns:
+        st.write("📌 Top Issues")
+        all_issues = filtered_df["issues"].dropna().str.split(", ").explode()
+        plot_bar(all_issues, "Most Common Issues")
+
+    st.write("🧾 Candidate Reasons")
+    if "candidate" in filtered_df.columns and "candidate_reason" in filtered_df.columns:
+        st.dataframe(filtered_df[["candidate", "candidate_reason"]].dropna())
+
+    # PR System Opinions
+    st.subheader("🗳️ PR System Opinions")
+    pr_questions = [
+        "pr_understand_system",
+        "pr_understand_allocation",
+        "prefer_individual_candidate",
+        "satisfied_representation",
+        "allow_coalition_negotiation",
+        "require_majority_to_govern",
+        "qualified_majority_to_govern"
+    ]
+
+    for q in pr_questions:
+        if q in filtered_df.columns:
+            plot_bar(filtered_df[q], q.replace('_', ' ').capitalize())
 
 # Main Voting Page
 if st.session_state.step == "email":
