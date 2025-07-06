@@ -1,37 +1,30 @@
 # vote_utils.py
 import re
 import pandas as pd
-import firebase_admin
-from firebase_admin import credentials, firestore
 
-# Ensure Firebase is initialized
-if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase_credentials.json")  # Replace with actual path
-    firebase_admin.initialize_app(cred)
-
-db = firestore.client()
+# All functions now expect db to be passed in from app.py
 
 def record_vote(data, db):
     email = data.get("email", "anonymous")
     key = re.sub(r'[.#$\[\]/]', '_', email)
     db.collection("votes").document(key).set(data)
 
-def has_already_voted(device_id):
+def has_already_voted(device_id, db):
     votes = db.collection("votes").where("device_id", "==", device_id).stream()
     return any(True for _ in votes)
 
-def has_email_already_voted(email):
+def has_email_already_voted(email, db):
     safe_email = re.sub(r'[.#$\[\]/]', '_', email)
     doc_ref = db.collection("votes").document(safe_email)
     return doc_ref.get().exists
 
-def get_vote_stats():
-    votes = get_vote_sheet()
+def get_vote_stats(db):
+    votes = get_vote_sheet(db)
     return {
         "total_votes": len(votes)
     }
 
-def get_vote_sheet():
+def get_vote_sheet(db):
     votes_ref = db.collection("votes")
     docs = votes_ref.stream()
     data = [doc.to_dict() for doc in docs]
