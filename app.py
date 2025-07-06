@@ -213,3 +213,4 @@ elif st.session_state.step == "vote":
 elif st.session_state.step == "done":
     st.header("🎉 Vote Submitted")
     st.write("Thank you for participating in the Guyana Voters Pulse!")
+    st.balloons()
