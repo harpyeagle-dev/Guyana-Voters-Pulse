@@ -80,10 +80,58 @@ elif st.session_state.step == "verify":
 
 elif st.session_state.step == "vote":
     st.header("Your Vote")
-    party = st.selectbox("Preferred Political Party", ["PPP", "PNC/APNU", "AFC", "Other", "Undecided"])
+    party = st.selectbox("Preferred Political Party", [
+    "All America Alliance for Guyana (AAA4G)",
+    "A Guyana National Service Party (AGNSP)",
+    "A Partnership for National Unity (APNU)",
+    "Assembly for Liberty and Prosperity (ALP)",
+    "A New and United Guyana (ANUG)",
+    "Citizen United (CU)",
+    "Democratic Peoples Party (DPR)",
+    "Destiny To Oneness (DTO)",
+    "Guyanese for Accouuntability, Meritocracy, Equality, Reform, Inclusion and Collaboration with America (GAMERICA)",
+    "Guyana Unity Party (GUP)",
+    "Horizon and Star (HAS)",
+    "Justice for All Party (JFAP)",
+    "People's Progressive Party/Civic (PPP/C)",
+    "The Citizenship Initiative (TCI)",
+    "The New Movement (TNM)",
+    "The Republic Party of Guyana (PRG)",
+    "United Workers Party (UWP)",
+    "Unity Guyana Democratic Party (UGDP)",
+    "United Republican Party (URP)",
+    "Unity Movement (UM)",
+    "Unity One (UO)",
+    "United Peoples Party (UPP)",
+    "We Invest In Nationhood (WIN)",
+    "Working People's Alliance (WPA)"
+])
     candidate = st.text_input("Preferred Candidate (if any)")
     candidate_reason = st.text_area("Why did you choose this candidate?", placeholder="Explain your reason...")
-    issues = st.multiselect("Top Issues Influencing Your Vote", ["Jobs", "Cost of Living", "Education", "Healthcare", "Corruption", "Crime", "Oil & Gas"])
+    issues = st.multiselect(
+    "Top Issues You Care About",
+    [
+        "Education",
+        "Healthcare",
+        "Jobs and Economy",
+        "Security and Crime",
+        "Oil and Gas Management",
+        "Renegotiate the 2016 PSA Oil Contract",
+        "Infrastructure",
+        "Cost of Living",
+        "Corruption",
+        "Environment",
+        "Political Stability",
+        "Constitutional Reform",
+        "Regional (rural/hinterland) Development",
+        "Improved Utility Services (Electricity, Water)",
+        "Improved Infrastructure",
+        "Agriculture Development",
+        "Sports Policy",
+        "Cultural Policy",
+        "Health Care"
+    ]
+)
     trust_gecom = st.radio("Do you trust GECOM to run a free and fair election?", ["Yes", "No", "Not sure"])
     age = st.selectbox("Age Group", ["18-24", "25-34", "35-44", "45-54", "55+"])
     gender = st.selectbox("Gender", ["Male", "Female", "Non-binary", "Prefer not to say"])
@@ -131,3 +179,4 @@ elif st.session_state.step == "vote":
 elif st.session_state.step == "done":
     st.header("🎉 Vote Submitted")
     st.write("Thank you for participating in the Guyana Voters Pulse!")
+
