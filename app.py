@@ -17,43 +17,37 @@ from vote_utils import (
 from device_utils import get_device_id
 from email_verification import send_verification_code, verify_code
 
+# Page setup
 st.set_page_config(page_title="Guyana Voters Pulse", layout="centered")
 
 # Initialize Firebase
+import firebase_admin
+from firebase_admin import credentials, firestore
+
 if not firebase_admin._apps:
-    cred = credentials.Certificate("firebase_credentials.json")  # Replace with your actual path
+    cred = credentials.Certificate("firebase_credentials.json")  # update path as needed
     firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
-# Initialize session state
-if "step" not in st.session_state:
-    st.session_state.step = "email"
-if "email" not in st.session_state:
-    st.session_state.email = ""
-if "vote_submitted" not in st.session_state:
-    st.session_state.vote_submitted = False
+# Admin Panel in Sidebar
+st.sidebar.title("🔧 Admin Access")
+admin_key_input = st.sidebar.text_input("Enter Admin Key", type="password")
 
-# Admin Dashboard
-st.sidebar.success("Access granted")
+if admin_key_input == "admin123":
+    st.sidebar.success("Access granted")
+    st.title("📊 Admin Dashboard")
 
-st.title("📊 Admin Dashboard")
-st.subheader("Filter Responses")
+    df = get_vote_sheet(db)
+    start_date = st.date_input("Start Date", datetime.date(2025, 1, 1))
+    end_date = st.date_input("End Date", datetime.date.today())
 
-# Filters
-start_date = st.date_input("Start Date", datetime.date(2025, 1, 1))
-end_date = st.date_input("End Date", datetime.date.today())
-df = get_vote_sheet(db)
+    if df.empty:
+        st.warning("⚠️ No vote records found.")
+        st.stop()
 
-if df.empty:
-    st.warning("⚠️ No votes found.")
-else:
     df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
-    df = df.dropna(subset=["timestamp"])
-    filtered_df = df[
-        (df["timestamp"] >= pd.to_datetime(start_date)) &
-        (df["timestamp"] <= pd.to_datetime(end_date))
-    ]
+    filtered_df = df[(df["timestamp"] >= pd.to_datetime(start_date)) & (df["timestamp"] <= pd.to_datetime(end_date))]
 
     age_filter = st.selectbox("Filter by Age", ["All"] + sorted(df["age"].dropna().unique().tolist()))
     region_filter = st.selectbox("Filter by Region", ["All"] + sorted(df["region"].dropna().unique().tolist()))
@@ -69,8 +63,15 @@ else:
     st.write("Filtered Responses:", len(filtered_df))
     st.dataframe(filtered_df)
 
-    # Download
     st.download_button("📥 Download CSV", data=filtered_df.to_csv(index=False), file_name="filtered_votes.csv")
+
+    # Insert your chart/graph code here (pie, bar, line)
+
+    st.success("✅ Admin mode activated. Voter form hidden.")
+    st.stop()  # 👈 Prevents the rest of the app from running
+
+else:
+    st.sidebar.info("Enter admin key to access the dashboard")
 
     # Charts
     st.subheader("📈 Visual Summaries")
