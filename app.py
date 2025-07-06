@@ -52,6 +52,31 @@ if admin_key_input == "admin123":
         filtered_df = filtered_df[filtered_df["trust_gecom"] == trust_filter]
 
     st.dataframe(filtered_df)
+
+    st.subheader("📊 Summary Charts")
+    st.write("### Preferred Political Party")
+    st.bar_chart(filtered_df["party"].value_counts())
+
+    st.write("### Trust in GECOM")
+    st.bar_chart(filtered_df["trust_gecom"].value_counts())
+
+    st.write("### Top Issues")
+    st.text("(Note: Multiple selections are split by comma)")
+    all_issues = filtered_df["issues"].dropna().str.split(", ").explode()
+    st.bar_chart(all_issues.value_counts())
+
+    st.write("### Preferred Candidate Reasons")
+    st.dataframe(filtered_df[["candidate", "candidate_reason"]].dropna())
+
+    st.write("### PR System Understanding and Opinions")
+    st.bar_chart(filtered_df["pr_understand_system"].value_counts())
+    st.bar_chart(filtered_df["pr_understand_allocation"].value_counts())
+    st.bar_chart(filtered_df["prefer_individual_candidate"].value_counts())
+    st.bar_chart(filtered_df["satisfied_representation"].value_counts())
+    st.bar_chart(filtered_df["allow_coalition_negotiation"].value_counts())
+    st.bar_chart(filtered_df["require_majority_to_govern"].value_counts())
+    st.bar_chart(filtered_df["qualified_majority_to_govern"].value_counts())
+
     st.download_button("Download CSV", data=filtered_df.to_csv(index=False), file_name="filtered_votes.csv")
 else:
     st.sidebar.warning("Admin access required")
@@ -179,4 +204,3 @@ elif st.session_state.step == "vote":
 elif st.session_state.step == "done":
     st.header("🎉 Vote Submitted")
     st.write("Thank you for participating in the Guyana Voters Pulse!")
-
