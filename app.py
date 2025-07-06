@@ -3,6 +3,8 @@ import streamlit as st
 import pandas as pd
 import datetime
 import matplotlib.pyplot as plt
+import firebase_admin
+from firebase_admin import credentials, firestore
 from vote_utils import (
     record_vote,
     has_already_voted,
@@ -16,6 +18,13 @@ from device_utils import get_device_id
 from email_verification import send_verification_code, verify_code
 
 st.set_page_config(page_title="Guyana Voters Pulse", layout="centered")
+
+# Initialize Firebase
+if not firebase_admin._apps:
+    cred = credentials.Certificate("firebase_credentials.json")  # Replace with your actual path
+    firebase_admin.initialize_app(cred)
+
+db = firestore.client()
 
 # Initialize session state
 if "step" not in st.session_state:
@@ -196,7 +205,7 @@ elif st.session_state.step == "vote":
                 "timestamp": datetime.datetime.now().isoformat(),
                 "device_id": device_id
             }
-            record_vote(vote)
+            record_vote(vote, db)
             st.session_state.vote_submitted = True
             st.success("Thank you! Your vote has been recorded.")
             st.session_state.step = "done"
