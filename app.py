@@ -61,7 +61,8 @@ if admin_key_input == "admin123":
     start_date = st.date_input("Start Date", df["timestamp"].min().date())
     end_date = st.date_input("End Date", df["timestamp"].max().date())
 
-    filtered_df = df[(df["timestamp"] >= pd.to_datetime(start_date)) & (df["timestamp"] <= pd.to_datetime(end_date))]
+    end_datetime = pd.to_datetime(end_date) + pd.Timedelta(days=1)
+    filtered_df = df[(df["timestamp"] >= pd.to_datetime(start_date)) & (df["timestamp"] < end_datetime)]
 
     if filtered_df.empty:
         st.warning("⚠️ No data in selected date range.")
