@@ -35,6 +35,17 @@ if admin_key_input == "admin123":
     st.title("📊 Admin Dashboard")
 
     df = get_vote_sheet(db)
+    st.write("📋 Raw Data Preview")
+st.dataframe(df.head())
+
+if "timestamp" in df.columns:
+    st.write("🕒 Timestamp values (raw):", df["timestamp"].tolist())
+    df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+    st.write("📅 Parsed timestamps:", df["timestamp"].head())
+    st.write("📆 Min timestamp:", df["timestamp"].min())
+    st.write("📆 Max timestamp:", df["timestamp"].max())
+else:
+    st.error("❌ No 'timestamp' column found in Firebase data.")
     start_date = st.date_input("Start Date", datetime.date(2025, 1, 1))
     end_date = st.date_input("End Date", datetime.date.today())
 
