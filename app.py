@@ -34,45 +34,33 @@ if admin_key_input == "admin123":
     st.sidebar.success("Access granted")
     st.title("📊 Admin Dashboard")
 
-    df = get_vote_sheet(db)
-    df = get_vote_sheet(db)
+    try:
+        df = get_vote_sheet(db)
+    except Exception as e:
+        st.error(f"❌ Error retrieving vote data: {e}")
+        st.stop()
 
-if not isinstance(df, pd.DataFrame):
-    st.error("❌ get_vote_sheet() did not return a DataFrame")
-    st.write("Returned value:", df)
-    st.stop()
-elif df.empty:
-    st.warning("⚠️ get_vote_sheet() returned an empty DataFrame")
-    st.stop()
-else:
-    st.write("✅ DataFrame loaded")
-    st.dataframe(df.head())
-
-    if "timestamp" in df.columns:
-        st.write("🕒 Timestamp values (raw):", df["timestamp"].tolist())
-        df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
-        st.write("📅 Parsed timestamps:", df["timestamp"].head())
-        st.write("📆 Min timestamp:", df["timestamp"].min())
-        st.write("📆 Max timestamp:", df["timestamp"].max())
-    else:
-        st.error("❌ No 'timestamp' column found in Firebase data.")
-
-if "timestamp" in df.columns:
-    st.write("🕒 Timestamp values (raw):", df["timestamp"].tolist())
-    df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
-    st.write("📅 Parsed timestamps:", df["timestamp"].head())
-    st.write("📆 Min timestamp:", df["timestamp"].min())
-    st.write("📆 Max timestamp:", df["timestamp"].max())
-else:
-    st.error("❌ No 'timestamp' column found in Firebase data.")
-    start_date = st.date_input("Start Date", datetime.date(2025, 1, 1))
-    end_date = st.date_input("End Date", datetime.date.today())
+    if not isinstance(df, pd.DataFrame):
+        st.error("❌ get_vote_sheet() did not return a DataFrame")
+        st.write("Returned value:", df)
+        st.stop()
 
     if df.empty:
         st.warning("⚠️ No vote records found.")
         st.stop()
 
+    if "timestamp" not in df.columns:
+        st.error("❌ No 'timestamp' column found in Firebase data.")
+        st.write("Available columns:", df.columns.tolist())
+        st.stop()
+
     df["timestamp"] = pd.to_datetime(df["timestamp"], errors="coerce")
+    st.write("📆 Min timestamp:", df["timestamp"].min())
+    st.write("📆 Max timestamp:", df["timestamp"].max())
+
+    start_date = st.date_input("Start Date", df["timestamp"].min().date())
+    end_date = st.date_input("End Date", df["timestamp"].max().date())
+
     filtered_df = df[(df["timestamp"] >= pd.to_datetime(start_date)) & (df["timestamp"] <= pd.to_datetime(end_date))]
 
     if filtered_df.empty:
@@ -143,7 +131,8 @@ else:
 
     st.stop()
 
-# Voter Flow
+# Voter interface handled below (restored logic)
+
 if "step" not in st.session_state:
     st.session_state.step = "email"
 if "email" not in st.session_state:
@@ -260,3 +249,4 @@ elif st.session_state.step == "vote":
 elif st.session_state.step == "done":
     st.header("🎉 Vote Submitted")
     st.write("Thank you for participating in the Guyana Voters Pulse!")
+# Continue with st.session_state.step logic...
