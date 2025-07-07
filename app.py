@@ -35,8 +35,16 @@ if admin_key_input == "admin123":
     st.title("📊 Admin Dashboard")
 
     df = get_vote_sheet(db)
-    st.write("📋 Raw Data Preview")
-st.dataframe(df.head())
+    if not isinstance(df, pd.DataFrame):
+    st.error("❌ get_vote_sheet() did not return a DataFrame")
+    st.write("Returned value:", df)
+    st.stop()
+elif df.empty:
+    st.warning("⚠️ get_vote_sheet() returned an empty DataFrame")
+    st.stop()
+else:
+    st.write("✅ DataFrame loaded")
+    st.dataframe(df.head())
 
 if "timestamp" in df.columns:
     st.write("🕒 Timestamp values (raw):", df["timestamp"].tolist())
